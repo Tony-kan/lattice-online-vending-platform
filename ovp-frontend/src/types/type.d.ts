@@ -1,14 +1,12 @@
-// Represents a logged-in user
 export type UserProps = {
   id: string;
   name: string;
   email: string;
-  role?: string;
+  role?: "admin" | "inventory_manager" | "billing_clerk";
 };
 
-// Props for the Header component
 export type HeaderProps = {
-  user: User | null; // null means not logged in
+  user: User | null;
   onLogout: () => void;
 };
 
@@ -19,4 +17,12 @@ export type BreadcrumbItem = {
 
 export type BreadcrumbsProps = {
   items: BreadcrumbItem[];
+};
+
+export type Module = {
+  name: string;
+  path: string;
+  icon: React.ReactNode;
+  description: string;
+  roles: User["role"][];
 };

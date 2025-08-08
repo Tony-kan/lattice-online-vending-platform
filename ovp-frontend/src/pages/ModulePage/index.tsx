@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 import Header from "@/components/common/Header";
@@ -11,21 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Building, DollarSign, Users, Monitor } from "lucide-react";
-
-interface User {
-  id: number;
-  email: string;
-  name?: string;
-  role: "admin" | "inventory_manager" | "billing_clerk";
-}
-
-interface Module {
-  name: string;
-  path: string;
-  icon: React.ReactNode;
-  description: string;
-  roles: User["role"][];
-}
+import type { Module, UserProps } from "@/types/type";
 
 const ALL_MODULES: Module[] = [
   {
@@ -53,7 +39,7 @@ const ALL_MODULES: Module[] = [
 
 const ModulePage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProps | null>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");

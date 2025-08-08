@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/table";
 import type { BreadcrumbItem } from "@/types/type";
 
-// Dummy data
 const items = [
   { id: 1, name: "Cola", quantity: 50, price: 150 },
   { id: 2, name: "Chips", quantity: 8, price: 200 },
