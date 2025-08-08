@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Header from "@/components/common/Header";
 import { Separator } from "@/components/ui/separator";
 import type { UserProps } from "@/types/type";
