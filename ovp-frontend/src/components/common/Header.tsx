@@ -1,0 +1,67 @@
+import React from "react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import type { HeaderProps } from "@/types/type";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+
+const Header = ({ user, onLogout }: HeaderProps) => {
+  return (
+    <header className="h-[16vh] flex items-center justify-between px-12">
+      {/* Logo */}
+      <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent">
+        Lattice vending platform
+      </h1>
+
+      {/* Auth Section */}
+      {!user ? (
+        <Button
+          variant="default"
+          className="bg-amber-500 border-2 rounded-sm border-transparent font-extrabold text-white w-28 hover:text-amber-500 hover:border-amber-500 hover:bg-transparent"
+        >
+          Sign In
+        </Button>
+      ) : (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="cursor-pointer bg-amber-500">
+              <AvatarFallback className="text-white font-bold">
+                {user.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-50 bg-white -ml-44 border-amber-500">
+            <DropdownMenuLabel className="text-lg font-semibold">
+              My Account
+            </DropdownMenuLabel>
+            <Separator className="bg-amber-500" />
+            <div className="px-2 py-1">
+              <p className="font-medium">{user.name}</p>
+              <p className="text-sm text-muted-foreground">{user.role}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={onLogout}
+              className="text-red-600 cursor-pointer"
+            >
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </header>
+  );
+};
+
+export default Header;

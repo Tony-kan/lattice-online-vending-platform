@@ -1,11 +1,10 @@
 import { useState } from "react";
+import HomePage from "./pages/Home/HomePage";
 
 function App() {
   return (
     <>
-      <div className="flex items-center justify-center border w-full h-screen">
-        <h1>Online vending platform</h1>
-      </div>
+      <HomePage />
     </>
   );
 }
