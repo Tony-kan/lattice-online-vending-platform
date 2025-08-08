@@ -33,7 +33,7 @@ const LoginPage = () => {
           user: {
             id: "1",
             email: "tonykanyamuka@gmail.com",
-            role: "billing_clerk",
+            role: "admin",
           },
         },
       };
@@ -110,7 +110,7 @@ const LoginPage = () => {
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button
                 type="submit"
-                className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-md"
+                className="w-full h-12 bg-amber-500 border-2 border-transparent  text-white font-extrabold text-md hover:bg-transparent hover:border-amber-500 hover:text-amber-500"
               >
                 Login
               </Button>
