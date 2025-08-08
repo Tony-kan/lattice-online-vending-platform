@@ -9,10 +9,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import type { HeaderProps } from "@/types/type";
+import type { HeaderProps, UserProps } from "@/types/type";
 import { Separator } from "@radix-ui/react-dropdown-menu";
+import { getInitials } from "@/lib/utils";
 
-const Header = ({ user, onLogout }: HeaderProps) => {
+const defaultUser: UserProps = {
+  id: "0",
+  name: "user",
+  email: "user@lattice.com",
+  role: "billing_clerk", // Or any other default/safe role
+};
+
+const Header = ({ user = defaultUser, onLogout }: HeaderProps) => {
   return (
     <header className="h-[16vh] flex items-center justify-between px-12">
       {/* Logo */}
@@ -33,11 +41,7 @@ const Header = ({ user, onLogout }: HeaderProps) => {
           <DropdownMenuTrigger asChild>
             <Avatar className="cursor-pointer bg-amber-500">
               <AvatarFallback className="text-white font-bold">
-                {user.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()}
+                {getInitials(user)}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
