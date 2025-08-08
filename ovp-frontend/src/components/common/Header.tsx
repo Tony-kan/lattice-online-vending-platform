@@ -17,7 +17,7 @@ const defaultUser: UserProps = {
   id: "0",
   name: "user",
   email: "user@lattice.com",
-  role: "billing_clerk", // Or any other default/safe role
+  role: "admin", // Or any other default/safe role
 };
 
 const Header = ({ user = defaultUser, onLogout }: HeaderProps) => {

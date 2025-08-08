@@ -56,7 +56,10 @@ const ModulePage = () => {
     navigate("/login");
   };
 
-  const availableModules = ALL_MODULES;
+  //   const availableModules = ALL_MODULES;
+  const availableModules = user
+    ? ALL_MODULES.filter((module) => module.roles.includes(user.role))
+    : [];
 
   // Show a loading state until the user is verified
   if (!user) {
@@ -69,10 +72,8 @@ const ModulePage = () => {
   console.log("available modules", availableModules);
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* 1. Header: Using your existing shared component */}
       <Header user={user} onLogout={handleLogout} />
 
-      {/* 2. Separator: The visual divider you requested */}
       <Separator className="bg-amber-500/20" />
 
       <main>

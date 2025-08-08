@@ -30,7 +30,11 @@ const LoginPage = () => {
       const response = {
         data: {
           accessToken: "mk",
-          user: { id: "1", email: "tonykanyamuka@gmail.com" },
+          user: {
+            id: "1",
+            email: "tonykanyamuka@gmail.com",
+            role: "billing_clerk",
+          },
         },
       };
       localStorage.setItem("token", response.data.accessToken);

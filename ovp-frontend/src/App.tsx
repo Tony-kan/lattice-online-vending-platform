@@ -8,6 +8,8 @@ import ModulePage from "./pages/ModulePage";
 import InventoryPage from "./pages/InventoryPage";
 import BillingPage from "./pages/BillingPage";
 import AdminPage from "./pages/AdminPage";
+import ProtectedRoute from "./components/ProtectedRoutes";
+import AccessDeniedPage from "./pages/AccessDeniedPage";
 
 const queryClient = new QueryClient();
 
@@ -19,50 +21,49 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<HomePage />} />
+            <Route path="/access-denied" element={<AccessDeniedPage />} />
+
             <Route
-              path="/modules"
               element={
-                <ProtectedRoute>
-                  <ModulePage />
-                </ProtectedRoute>
+                <ProtectedRoute
+                  allowedRoles={["admin", "inventory_manager", "billing_clerk"]}
+                />
               }
-            />
+            >
+              <Route path="/modules" element={<ModulePage />} />
+            </Route>
+
+            {/* Routes for Inventory staff and Admins */}
             <Route
-              path="/inventory"
               element={
-                <ProtectedRoute>
-                  <InventoryPage />
-                </ProtectedRoute>
+                <ProtectedRoute allowedRoles={["admin", "inventory_manager"]} />
               }
-            />
+            >
+              <Route path="/inventory" element={<InventoryPage />} />
+            </Route>
+
+            {/* Routes for Billing staff and Admins */}
             <Route
-              path="/billing"
               element={
-                <ProtectedRoute>
-                  <BillingPage />
-                </ProtectedRoute>
+                <ProtectedRoute allowedRoles={["admin", "billing_clerk"]} />
               }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminPage />
-                </ProtectedRoute>
-              }
-            />
+            >
+              <Route path="/billing" element={<BillingPage />} />
+            </Route>
+
+            {/* Routes for Admins ONLY */}
+            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+              <Route path="/admin" element={<AdminPage />} />
+            </Route>
+
+            {/* == Catch-all Route == */}
+            {/* Redirects any invalid URL to a safe default page */}
+            <Route path="*" element={<Navigate to="/modules" replace />} />
           </Routes>
         </BrowserRouter>
       </QueryClientProvider>
     </>
   );
-}
-
-function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
-  // const token = "nsmn"
-  if (!token) return <Navigate to="/login" replace />;
-  return children;
 }
 
 export default App;
