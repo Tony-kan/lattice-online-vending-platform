@@ -8,8 +8,11 @@ import ModulePage from "./pages/ModulePage";
 import InventoryPage from "./pages/InventoryPage";
 import BillingPage from "./pages/BillingPage";
 import AdminPage from "./pages/AdminPage";
+
 import ProtectedRoute from "./components/ProtectedRoutes";
 import AccessDeniedPage from "./pages/AccessDeniedPage";
+
+import MainLayout from "./components/MainLayout";
 
 const queryClient = new QueryClient();
 
@@ -23,37 +26,42 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/access-denied" element={<AccessDeniedPage />} />
 
-            <Route
-              element={
-                <ProtectedRoute
-                  allowedRoles={["admin", "inventory_manager", "billing_clerk"]}
-                />
-              }
-            >
-              <Route path="/modules" element={<ModulePage />} />
-            </Route>
+            <Route element={<MainLayout />}>
+              <Route
+                element={
+                  <ProtectedRoute
+                    allowedRoles={[
+                      "admin",
+                      "inventory_manager",
+                      "billing_clerk",
+                    ]}
+                  />
+                }
+              >
+                <Route path="/modules" element={<ModulePage />} />
+              </Route>
 
-            {/* Routes for Inventory staff and Admins */}
-            <Route
-              element={
-                <ProtectedRoute allowedRoles={["admin", "inventory_manager"]} />
-              }
-            >
-              <Route path="/inventory" element={<InventoryPage />} />
-            </Route>
+              <Route
+                element={
+                  <ProtectedRoute
+                    allowedRoles={["admin", "inventory_manager"]}
+                  />
+                }
+              >
+                <Route path="/inventory" element={<InventoryPage />} />
+              </Route>
 
-            {/* Routes for Billing staff and Admins */}
-            <Route
-              element={
-                <ProtectedRoute allowedRoles={["admin", "billing_clerk"]} />
-              }
-            >
-              <Route path="/billing" element={<BillingPage />} />
-            </Route>
+              <Route
+                element={
+                  <ProtectedRoute allowedRoles={["admin", "billing_clerk"]} />
+                }
+              >
+                <Route path="/billing" element={<BillingPage />} />
+              </Route>
 
-            {/* Routes for Admins ONLY */}
-            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-              <Route path="/admin" element={<AdminPage />} />
+              <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route path="/admin" element={<AdminPage />} />
+              </Route>
             </Route>
 
             {/* == Catch-all Route == */}

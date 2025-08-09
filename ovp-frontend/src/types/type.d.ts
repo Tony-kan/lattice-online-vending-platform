@@ -34,7 +34,7 @@ export type LoginCredentials = {
 };
 
 export type AuthResponse = {
-  accessToken: string;
+  token: string;
   user: {
     id: string;
     email: string;

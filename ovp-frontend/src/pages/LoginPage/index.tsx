@@ -9,74 +9,56 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AtSign, Eye, EyeOff, Monitor } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-// import { useMutation } from "@tanstack/react-query";
-// import { loginUser } from "@/api/AuthApi";
-// import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { loginUser } from "@/api/AuthApi";
+import type { AuthResponse, LoginCredentials } from "@/types/type";
+import type { AxiosError } from "axios";
+
+interface ApiError {
+  error: string;
+}
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    try {
-      //   const response = await axios.post("http://localhost:3001/login", {
-      //     email,
-      //     password,
-      //   });
-      const response = {
-        data: {
-          accessToken: "mk",
-          user: {
-            id: "1",
-            email: "tonykanyamuka@gmail.com",
-            role: "admin",
-          },
-        },
-      };
-      localStorage.setItem("token", response.data.accessToken);
-      localStorage.setItem("user", JSON.stringify(response?.data?.user));
-      navigate("/modules");
-    } catch (err) {
-      setError("Invalid email or password. Please try again.");
-    }
-  };
-
-  // -----------------------------
-
   // --- TanStack Query Mutation ---
-  // The 'error' and 'isPending' (loading) states are now managed by the hook.
-  //   const loginMutation = useMutation({
-  //     mutationFn: loginUser, // The async function to call
-  //     onSuccess: (data) => {
-  //       // On success, perform the side-effects: save to localStorage and navigate
-  //       localStorage.setItem("token", data.accessToken);
-  //       localStorage.setItem("user", JSON.stringify(data.user));
-  //       navigate("/modules");
-  //     },
-  //     onError: (error) => {
-  //       // You can add global error handling here, like logging to a service.
-  //       // The error object is available on `loginMutation.error`.
-  //       console.error("Login failed:", error);
-  //     },
-  //   });
+
+  const loginMutation = useMutation<
+    AuthResponse,
+    AxiosError<ApiError>, // We specify that the error is an AxiosError with our custom ApiError shape
+    LoginCredentials
+  >({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      navigate("/modules");
+    },
+    onError: (error) => {
+      console.error(
+        "Login failed:",
+        error.response?.data.error || error.message
+      );
+    },
+  });
 
   // The new submit handler simply calls the mutation.
-  //   const handleLogin = (e: React.FormEvent) => {
-  //     e.preventDefault();
-  //     loginMutation.mutate({ email, password });
-  //   };
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate({ email, password });
+  };
 
   return (
     <div className="min-h-screen w-full flex bg-slate-50">
       <div className="hidden lg:flex flex-col items-center justify-center w-1/2 bg-amber-500 text-white p-12 text-center">
-        <Monitor size={100} className="mb-6" />
+        <Link to="/">
+          <Monitor size={100} className="mb-6" />
+        </Link>
         <h1 className="text-4xl font-bold mb-4">Welcome to Lattice OVP</h1>
         <p className="text-lg text-amber-100">
           Your one-stop solution for managing vending operations seamlessly.
@@ -86,9 +68,11 @@ const LoginPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent pb-2">
-              Lattice Vending Platform
-            </h1>
+            <Link to="/">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent pb-2">
+                Lattice Vending Platform
+              </h1>
+            </Link>
             <CardDescription>
               Enter your credentials to access your Modules
             </CardDescription>
@@ -135,12 +119,13 @@ const LoginPage = () => {
                   </button>
                 </div>
               </div>
-              {/* {loginMutation.isError && (
-                <p className="text-sm text-red-500">
-                  Provide a user-friendly default error message
-                  Invalid email or password. Please try again.
+
+              {loginMutation.isError && (
+                <p className="text-sm text-center text-red-500 capitalize">
+                  {loginMutation.error.response?.data?.error ||
+                    "An unexpected error occurred. Please try again."}
                 </p>
-              )} */}
+              )}
               <Button
                 type="submit"
                 className="w-full h-12 bg-amber-500 border-2 border-transparent  text-white font-extrabold text-md hover:bg-transparent hover:border-amber-500 hover:text-amber-500"

@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-
-import Header from "@/components/common/Header";
-import { Separator } from "@/components/ui/separator";
-
+import ModuleLayout from "@/components/layout/ModuleLayout";
 import {
   Card,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
+import { Link, useNavigate } from "react-router-dom";
+import type { BreadcrumbItem, Module, UserProps } from "@/types/type";
 import { Building, DollarSign, Users, Monitor } from "lucide-react";
-import type { Module, UserProps } from "@/types/type";
+
+// Define the breadcrumbs for this specific page
+const breadcrumbs: BreadcrumbItem[] = [{ label: "Home", href: "/modules" }];
 
 const ALL_MODULES: Module[] = [
   {
@@ -43,6 +43,7 @@ const ModulePage = () => {
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
+    console.log("user data ", userData);
     if (!userData) {
       navigate("/login");
     } else {
@@ -50,18 +51,12 @@ const ModulePage = () => {
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
-
-  //   const availableModules = ALL_MODULES;
   const availableModules = user
-    ? ALL_MODULES.filter((module) => module.roles.includes(user.role))
+    ? ALL_MODULES.filter((module) =>
+        module.roles.includes(user.role?.toLowerCase())
+      )
     : [];
 
-  // Show a loading state until the user is verified
   if (!user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-slate-50">
@@ -69,15 +64,11 @@ const ModulePage = () => {
       </div>
     );
   }
-  console.log("available modules", availableModules);
+
   return (
-    <div className="min-h-screen bg-slate-100">
-      <Header user={user} onLogout={handleLogout} />
-
-      <Separator className="bg-amber-500/20" />
-
+    <ModuleLayout title="Application Modules" breadcrumbs={breadcrumbs}>
       <main>
-        <div className="max-w-7xl mx-auto gap-6 py-8 sm:px-6 lg:px-8">
+        <div className="max-w-10xl mx-auto gap-6 py-8 sm:px-6 lg:px-0">
           <div className="px-4 pb-4 sm:px-0">
             <h2 className="text-xl font-semibold text-slate-800">
               Available Modules
@@ -110,7 +101,7 @@ const ModulePage = () => {
           </div>
         </div>
       </main>
-    </div>
+    </ModuleLayout>
   );
 };
 

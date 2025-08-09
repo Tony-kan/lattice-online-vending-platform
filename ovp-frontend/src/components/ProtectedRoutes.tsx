@@ -16,24 +16,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
 
   if (!token || !userString) {
     // Not authenticated, redirect to login
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   const user: { role: Role } = JSON.parse(userString);
 
-  if (!allowedRoles.includes(user.role)) {
-    // Authenticated but not authorized, redirect to Modules display page
-    // A more user-friendly approach might show an "Access Denied" page
-    return (
-      <Navigate
-        to="/access-denied"
-        replace
-        state={{ from: location.pathname, requiredRoles: allowedRoles }}
-      />
-    );
+  const hasAccess = allowedRoles.some(
+    (role) => user.role.toLowerCase() === role.toLowerCase()
+  );
+
+  if (!hasAccess) {
+    return <Navigate to="/access-denied" replace />;
   }
 
-  // Authenticated and authorized, render the child route content
   return <Outlet />;
 };
 

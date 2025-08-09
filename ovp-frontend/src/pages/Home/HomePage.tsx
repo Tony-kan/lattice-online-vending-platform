@@ -1,19 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/common/Header";
 import { Separator } from "@/components/ui/separator";
 import type { UserProps } from "@/types/type";
+import { useNavigate } from "react-router-dom";
 
 const HomePage = () => {
-  const [user, setUser] = useState<UserProps | null>({
-    id: "1",
-    name: "Tony Kanyamuka",
-    email: "tony@example.com",
-  });
+  const [user, setUser] = useState<UserProps | null>(null);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userString = localStorage.getItem("user");
+    if (userString) {
+      setUser(JSON.parse(userString));
+    }
+  }, []);
 
   const handleLogout = () => {
-    setUser(null);
-    console.log("User logged out");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null); // Update the UI immediately
+    navigate("/login"); // Redirect to the login page
   };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}

@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { database } from "../database/connect_db.js";
 import { users } from "../database/models/user.model.js";
 import { eq } from "drizzle-orm";
-import { JWT_SECRET } from "../config/env.js";
+import { JWT_EXPIRES_IN, JWT_SECRET } from "../config/env.js";
 
 //Todo : check if the email already exists
 export const registerUser = async (req, res) => {
@@ -68,7 +68,7 @@ export const login = async (req, res) => {
   const token = jwt.sign(
     { userId: user.id, email: user.email, role: user.role },
     JWT_SECRET,
-    { expiresIn: "8h" }
+    { expiresIn: JWT_EXPIRES_IN }
   );
   res.json({
     token,

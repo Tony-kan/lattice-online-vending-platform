@@ -1,4 +1,3 @@
-// import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,27 +11,35 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { HeaderProps, UserProps } from "@/types/type";
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { getInitials } from "@/lib/utils";
+import { Link, useNavigate } from "react-router-dom";
 
 const defaultUser: UserProps = {
   id: "0",
   name: "user",
   email: "user@lattice.com",
-  role: "admin", // Or any other default/safe role
+  role: "admin",
 };
 
 const Header = ({ user = defaultUser, onLogout }: HeaderProps) => {
+  const navigate = useNavigate();
+  const handleLogin = () => {
+    navigate("/login");
+  };
   return (
     <header className="h-[16vh] flex items-center justify-between px-12">
       {/* Logo */}
-      <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent">
-        Lattice vending platform
-      </h1>
+      <Link to="/">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 bg-clip-text text-transparent">
+          Lattice vending platform
+        </h1>
+      </Link>
 
       {/* Auth Section */}
       {!user ? (
         <Button
           variant="default"
           className="bg-amber-500 border-2 rounded-sm border-transparent font-extrabold text-white w-28 hover:text-amber-500 hover:border-amber-500 hover:bg-transparent"
+          onClick={handleLogin}
         >
           Sign In
         </Button>
