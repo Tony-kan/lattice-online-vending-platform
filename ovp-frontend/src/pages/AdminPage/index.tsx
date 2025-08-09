@@ -111,7 +111,7 @@ const AdminPage = () => {
   return (
     <ModuleLayout title="Admin : User Management" breadcrumbs={breadcrumbItems}>
       <div className="space-y-4 mt-10">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center gap-4">
           <Input
             placeholder="Search by name or email..."
             value={searchTerm}

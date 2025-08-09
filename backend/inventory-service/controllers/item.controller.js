@@ -36,7 +36,7 @@ export const updateItemDetails = async (req, res) => {
   const { name, sku, price, stock } = req.body;
   await database
     .update(items)
-    .set({ name, sku, price, stock })
+    .set({ name, sku, price, stock, updated_at: new Date() })
     .where(eq(items.id, id));
   const updated = await database.select().from(items).where(eq(items.id, id));
   res.json(updated[0]);

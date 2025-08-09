@@ -62,3 +62,23 @@ export interface INewUser {
   role: UserRole;
   name: string;
 }
+
+// ... other types
+
+export interface IInventoryItem {
+  id: number;
+  name: string;
+  sku: string;
+  price: number;
+  stock: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// For the "add/edit" form
+export interface INewInventoryItem {
+  name: string;
+  sku: string;
+  price: number;
+  stock: number;
+}

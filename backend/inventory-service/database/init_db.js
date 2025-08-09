@@ -8,7 +8,8 @@ export default async function init() {
     sku TEXT NOT NULL,
     price NUMERIC NOT NULL,
     stock INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
   );`;
   const client = await poolClient.connect();
   try {
