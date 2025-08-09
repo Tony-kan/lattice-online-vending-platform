@@ -45,19 +45,24 @@ const Header = ({ user = defaultUser, onLogout }: HeaderProps) => {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-50 bg-white -ml-44 border-amber-500">
-            <DropdownMenuLabel className="text-lg font-semibold">
+          <DropdownMenuContent className="w-60 bg-white -ml-48 border-amber-500">
+            <DropdownMenuLabel className="text-lg font-semibold mt-2 mx-2">
               My Account
             </DropdownMenuLabel>
-            <Separator className="bg-amber-500" />
-            <div className="px-2 py-1">
+
+            <Separator className="bg-amber-600" />
+
+            <div className="px-2 py-2 mx-2">
               <p className="font-medium">{user.name}</p>
-              <p className="text-sm text-muted-foreground">{user.role}</p>
+              <p className="text-sm">{user.email}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Role : {user.role}
+              </p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={onLogout}
-              className="text-red-600 cursor-pointer"
+              className="text-red-600 cursor-pointer mb-2 mx-2"
             >
               Logout
             </DropdownMenuItem>

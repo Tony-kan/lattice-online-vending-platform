@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AtSign, Eye, EyeOff, Monitor } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+// import { useMutation } from "@tanstack/react-query";
+// import { loginUser } from "@/api/AuthApi";
 // import axios from "axios";
 
 const LoginPage = () => {
@@ -17,6 +19,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -44,6 +47,31 @@ const LoginPage = () => {
       setError("Invalid email or password. Please try again.");
     }
   };
+
+  // -----------------------------
+
+  // --- TanStack Query Mutation ---
+  // The 'error' and 'isPending' (loading) states are now managed by the hook.
+  //   const loginMutation = useMutation({
+  //     mutationFn: loginUser, // The async function to call
+  //     onSuccess: (data) => {
+  //       // On success, perform the side-effects: save to localStorage and navigate
+  //       localStorage.setItem("token", data.accessToken);
+  //       localStorage.setItem("user", JSON.stringify(data.user));
+  //       navigate("/modules");
+  //     },
+  //     onError: (error) => {
+  //       // You can add global error handling here, like logging to a service.
+  //       // The error object is available on `loginMutation.error`.
+  //       console.error("Login failed:", error);
+  //     },
+  //   });
+
+  // The new submit handler simply calls the mutation.
+  //   const handleLogin = (e: React.FormEvent) => {
+  //     e.preventDefault();
+  //     loginMutation.mutate({ email, password });
+  //   };
 
   return (
     <div className="min-h-screen w-full flex bg-slate-50">
@@ -107,7 +135,12 @@ const LoginPage = () => {
                   </button>
                 </div>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {/* {loginMutation.isError && (
+                <p className="text-sm text-red-500">
+                  Provide a user-friendly default error message
+                  Invalid email or password. Please try again.
+                </p>
+              )} */}
               <Button
                 type="submit"
                 className="w-full h-12 bg-amber-500 border-2 border-transparent  text-white font-extrabold text-md hover:bg-transparent hover:border-amber-500 hover:text-amber-500"

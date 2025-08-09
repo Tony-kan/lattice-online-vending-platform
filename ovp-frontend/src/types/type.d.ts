@@ -17,6 +17,7 @@ export type BreadcrumbItem = {
 
 export type BreadcrumbsProps = {
   items: BreadcrumbItem[];
+  showBackButton?: boolean;
 };
 
 export type Module = {
@@ -25,4 +26,18 @@ export type Module = {
   icon: React.ReactNode;
   description: string;
   roles: User["role"][];
+};
+
+export type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+export type AuthResponse = {
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    role: "admin" | "inventory_manager" | "billing_clerk";
+  };
 };
