@@ -1,0 +1,17 @@
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+# Dependencies
+node_modules
+
+/node_modules
+
+# dotenv environment variables file
+.env
+.env.*.local
+
+# next.js build output
+.next
+
+logs
