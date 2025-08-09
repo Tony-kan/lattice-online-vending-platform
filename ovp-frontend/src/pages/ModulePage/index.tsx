@@ -69,7 +69,7 @@ const ModulePage = () => {
     <ModuleLayout title="Application Modules" breadcrumbs={breadcrumbs}>
       <main>
         <div className="max-w-10xl mx-auto gap-6 py-8 sm:px-6 lg:px-0">
-          <div className="px-4 pb-4 sm:px-0">
+          <div className="px-4 pb-10 sm:px-0">
             <h2 className="text-xl font-semibold text-slate-800">
               Available Modules
             </h2>

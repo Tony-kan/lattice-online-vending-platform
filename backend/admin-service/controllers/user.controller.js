@@ -1,7 +1,6 @@
 // backend/admin-service/controllers/user.controller.js
 
 import bcrypt from "bcrypt";
-// import jwt from "jsonwebtoken";
 import { database } from "../database/connect_db.js";
 import { users } from "../database/models/user.model.js";
 import { eq } from "drizzle-orm";
@@ -38,7 +37,7 @@ export const updateUserDetails = async (req, res) => {
   const { email, role, name } = req.body;
   await database
     .update(users)
-    .set({ email, role, name })
+    .set({ email, role, name, updated_at: new Date() })
     .where(eq(users.id, id));
   const updated = await database.select().from(users).where(eq(users.id, id));
   res.json(updated[0]);

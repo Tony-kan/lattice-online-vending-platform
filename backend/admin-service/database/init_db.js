@@ -8,7 +8,8 @@ export default async function init() {
     password TEXT NOT NULL,
     role TEXT NOT NULL,
     name TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
   );`;
   const client = await poolClient.connect();
   try {

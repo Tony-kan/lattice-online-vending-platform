@@ -128,7 +128,7 @@ const LoginPage = () => {
               )}
               <Button
                 type="submit"
-                className="w-full h-12 bg-amber-500 border-2 border-transparent  text-white font-extrabold text-md hover:bg-transparent hover:border-amber-500 hover:text-amber-500"
+                className="w-full h-12 bg-amber-500 border-2 border-transparent  text-white font-extrabold text-md hover:bg-transparent hover:border-amber-500 hover:text-amber-500 active:bg-amber-600 active:text-white"
               >
                 Login
               </Button>

@@ -41,3 +41,24 @@ export type AuthResponse = {
     role: "admin" | "inventory_manager" | "billing_clerk";
   };
 };
+
+// ... other types
+
+export type UserRole = "ADMIN" | "INVENTORY_MANAGER" | "BILLING_CLERK";
+
+export interface IUser {
+  id: string | number;
+  name: string;
+  email: string;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
+}
+
+// For creating a new user
+export interface INewUser {
+  email: string;
+  password?: string; // Password is required for new users, but optional for updates
+  role: UserRole;
+  name: string;
+}
