@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"cd auth-service && npm run dev\" \"cd inventory-service && npm run dev\" \"cd admin-service && npm run dev\" \"cd billing-service && npm run dev\""
+    "dev": "concurrently \"cd auth-service && npm run dev\" \"cd inventory-service && npm run dev\" \"cd admin-service && npm run dev\" \"cd billing-service && npm run dev\" \"cd api-gateway && npm run dev\""
   },
   "keywords": [],
   "author": "",

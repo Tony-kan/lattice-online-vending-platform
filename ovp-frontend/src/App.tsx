@@ -70,7 +70,7 @@ function App() {
             <Route path="*" element={<Navigate to="/modules" replace />} />
           </Routes>
         </BrowserRouter>
-        <Toaster position="top-center" richColors />
+        <Toaster position="top-center" richColors duration={3000} />
       </QueryClientProvider>
     </>
   );

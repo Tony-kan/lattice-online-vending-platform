@@ -4,6 +4,8 @@ import type { LoginCredentials, AuthResponse } from "@/types/type"; // Assuming 
 // Create a configured axios instance (optional but good practice)
 const apiClient = axios.create({
   baseURL: "http://localhost:4000/auth", // Your auth service URL
+  // baseURL: "http://localhost:8080/api/auth", // Your auth service URL
+  //
   headers: {
     "Content-Type": "application/json",
   },

@@ -4,6 +4,7 @@ import type { IUser, INewUser } from "@/types/type";
 // Create a configured axios instance for the Admin Service
 const adminApiClient = axios.create({
   baseURL: "http://localhost:4003/admin", // Your admin service URL
+  // baseURL: "http://localhost:8080/api/admin",
 });
 
 // VERY IMPORTANT: Use an interceptor to automatically add the auth token
