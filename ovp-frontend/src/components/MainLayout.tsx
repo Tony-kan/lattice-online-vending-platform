@@ -25,7 +25,7 @@ const MainLayout = () => {
   };
 
   if (!user) {
-    return null; // Or a full-page loader
+    return null; 
   }
 
   return (
