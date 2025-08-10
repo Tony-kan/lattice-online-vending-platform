@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 import { createSale, getSalesHistory, getReceiptById } from "@/api/BillingApi";
 import { getAllItems } from "@/api/InventoryApi";
@@ -87,16 +88,20 @@ const BillingPage = () => {
     INewSalePayload
   >({
     mutationFn: createSale,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["salesHistory"] });
       queryClient.invalidateQueries({ queryKey: ["inventoryItems"] });
       setCart([]);
       setTax("0");
       setDiscount("0");
-      alert("Sale created successfully!");
+      toast.success("Sale Created Successfully!", {
+        description: `Receipt ID: ${data.receipt}`,
+      });
     },
     onError: (err) =>
-      console.log(`Error: ${err.response?.data?.error || err.message}`),
+      toast.error("Sale Creation Failed", {
+        description: err.response?.data?.error || err.message,
+      }),
   });
   //  alert(`Error: ${err.response?.data?.error || err.message}`),
   // --- HANDLERS ---
@@ -134,6 +139,28 @@ const BillingPage = () => {
     setCart(cart.filter((item) => item.item_id !== itemId));
   };
 
+  const handleUpdateQuantity = (
+    itemId: string | number,
+    newQuantity: number
+  ) => {
+    const inventoryItem = inventoryItems.find((item) => item.id === itemId);
+    if (!inventoryItem) return;
+
+    // Clamp the quantity between 1 and the available stock
+    const validatedQuantity = Math.max(
+      1,
+      Math.min(newQuantity, inventoryItem.stock)
+    );
+
+    setCart(
+      cart.map((item) =>
+        item.item_id === itemId
+          ? { ...item, quantity: validatedQuantity }
+          : item
+      )
+    );
+  };
+
   // 4. Calculate totals using useMemo for efficiency
   const { subtotal, totalTax, totalDiscount, grandTotal } = useMemo(() => {
     const sub = cart.reduce(
@@ -163,7 +190,10 @@ const BillingPage = () => {
 
   const handleSubmitSale = () => {
     if (cart.length === 0)
-      return alert("Cannot create a sale with an empty cart.");
+      // return alert("Cannot create a sale with an empty cart.");
+      return toast.info("Your cart is empty.", {
+        description: "Please add at least one item to create a sale.",
+      });
 
     const sanitizedTax = Math.abs(parseFloat(tax)) || 0;
     const sanitizedDiscount = Math.abs(parseFloat(discount)) || 0;
@@ -210,7 +240,27 @@ const BillingPage = () => {
                   {cart.map((item) => (
                     <TableRow key={item.item_id}>
                       <TableCell>{item.name}</TableCell>
-                      <TableCell>{item.quantity}</TableCell>
+                      {/* <TableCell>{item.quantity}</TableCell> */}
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="h-8 text-center focus-visible:ring-3 focus-visible:ring-amber-500 focus-visible:border-transparent"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleUpdateQuantity(
+                              item.item_id,
+                              parseInt(e.target.value, 10)
+                            )
+                          }
+                          min="1"
+                          // Set max to the item's stock from inventory
+                          max={
+                            inventoryItems.find(
+                              (invItem) => invItem.id === item.item_id
+                            )?.stock
+                          }
+                        />
+                      </TableCell>
                       <TableCell>{formatPrice(item.price || 0)}</TableCell>
                       <TableCell>
                         {formatPrice((item.price || 0) * item.quantity)}

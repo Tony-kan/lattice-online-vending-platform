@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 import { getAllUsers, addUser, updateUser, deleteUser } from "@/api/AdminApi";
 
@@ -57,10 +58,18 @@ const AdminPage = () => {
   // 2. Mutation for Adding a User
   const addUserMutation = useMutation<IUser, AxiosError<ApiError>, INewUser>({
     mutationFn: addUser,
-    onSuccess: () => {
+    onSuccess: (newUser) => {
       // When a user is added, invalidate the 'users' query to refetch the list
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setIsFormOpen(false); // Close the dialog on success
+      toast.success("User Added Successfully", {
+        description: `User ${newUser.name} has been created.`,
+      });
+    },
+    onError: (err) => {
+      toast.error("Failed to Add User", {
+        description: err.response?.data?.error || err.message,
+      });
     },
   });
 
@@ -71,10 +80,18 @@ const AdminPage = () => {
     { id: string | number; data: Partial<INewUser> }
   >({
     mutationFn: ({ id, data }) => updateUser(id, data),
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       setIsFormOpen(false);
       setSelectedUser(null);
+      toast.success("User Updated Successfully", {
+        description: `Details for ${updatedUser.name} have been saved.`,
+      });
+    },
+    onError: (err) => {
+      toast.error("Failed to Update User", {
+        description: err.response?.data?.error || err.message,
+      });
     },
   });
 
@@ -87,6 +104,12 @@ const AdminPage = () => {
     mutationFn: deleteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.success("User Deleted Successfully");
+    },
+    onError: (err) => {
+      toast.error("Failed to Delete User", {
+        description: err.response?.data?.error || err.message,
+      });
     },
   });
 

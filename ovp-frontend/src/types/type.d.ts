@@ -38,6 +38,7 @@ export type AuthResponse = {
   user: {
     id: string;
     email: string;
+    name?: string;
     role: "admin" | "inventory_manager" | "billing_clerk";
   };
 };

@@ -1,8 +1,9 @@
 // import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import HomePage from "./pages/Home/HomePage";
+import { Toaster } from "sonner";
 
+import HomePage from "./pages/Home/HomePage";
 import LoginPage from "./pages/LoginPage";
 import ModulePage from "./pages/ModulePage";
 import InventoryPage from "./pages/InventoryPage";
@@ -69,6 +70,7 @@ function App() {
             <Route path="*" element={<Navigate to="/modules" replace />} />
           </Routes>
         </BrowserRouter>
+        <Toaster position="top-center" richColors />
       </QueryClientProvider>
     </>
   );

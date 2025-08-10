@@ -14,6 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser } from "@/api/AuthApi";
 import type { AuthResponse, LoginCredentials } from "@/types/type";
 import type { AxiosError } from "axios";
+import { toast } from "sonner";
 
 interface ApiError {
   error: string;
@@ -37,13 +38,15 @@ const LoginPage = () => {
     onSuccess: (data) => {
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+      toast.success(`Welcome back, ${data.user.name || "User"}!`);
       navigate("/modules");
     },
     onError: (error) => {
-      console.error(
-        "Login failed:",
-        error.response?.data.error || error.message
-      );
+      toast.error("Login Failed", {
+        description:
+          error.response?.data?.error || "Invalid credentials or server error.",
+        duration: 5000, // Keep the error on screen a bit longer
+      });
     },
   });
 

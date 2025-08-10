@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 import {
   getAllItems,
@@ -74,15 +75,17 @@ const InventoryPage = () => {
     INewInventoryItem
   >({
     mutationFn: addItem,
-    onSuccess: () => {
+    onSuccess: (newItem) => {
       queryClient.invalidateQueries({ queryKey: ["inventoryItems"] }); // Refetch list
       setIsFormOpen(false); // Close dialog
+      toast.success("Item Added Successfully", {
+        description: `${newItem.name} has been added to inventory.`,
+      });
     },
     onError: (err) =>
-      console.error(
-        "Error adding item:",
-        err.response?.data.error || err.message
-      ),
+      toast.error("Failed to Add Item", {
+        description: err.response?.data?.error || err.message,
+      }),
   });
 
   // 3. Mutation for Updating Item
@@ -92,16 +95,18 @@ const InventoryPage = () => {
     { id: string | number; data: Partial<INewInventoryItem> }
   >({
     mutationFn: ({ id, data }) => updateItem(id, data),
-    onSuccess: () => {
+    onSuccess: (updatedItem) => {
       queryClient.invalidateQueries({ queryKey: ["inventoryItems"] }); // Refetch list
       setIsFormOpen(false); // Close dialog
       setSelectedItem(null); // Clear selected item
+      toast.success("Item Updated Successfully", {
+        description: `Details for ${updatedItem.name} have been saved.`,
+      });
     },
     onError: (err) =>
-      console.error(
-        "Error updating item:",
-        err.response?.data.error || err.message
-      ),
+      toast.error("Failed to Update Item", {
+        description: err.response?.data?.error || err.message,
+      }),
   });
 
   // 4. Mutation for Deleting Item
@@ -113,12 +118,12 @@ const InventoryPage = () => {
     mutationFn: deleteItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventoryItems"] }); // Refetch list
+      toast.success("Item Deleted Successfully");
     },
     onError: (err) =>
-      console.error(
-        "Error deleting item:",
-        err.response?.data.error || err.message
-      ),
+      toast.error("Failed to Delete Item", {
+        description: err.response?.data?.error || err.message,
+      }),
   });
 
   const handleEditClick = (item: IInventoryItem) => {
