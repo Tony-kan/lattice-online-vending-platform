@@ -12,7 +12,6 @@ export const getAllSales = async (req, res) => {
       .select()
       .from(sales)
       .orderBy(desc(sales.created_at));
-    console.log("all sales ", allSales);
 
     res.json(allSales);
   } catch (err) {
@@ -58,7 +57,7 @@ export const createSale = async (req, res) => {
       }
 
       // 3. Calculate final total
-      const total = subtotal * (1 + Number(tax)) * (1 - Number(discount));
+      const total = subtotal + Number(tax) - Number(discount);
       const receiptId = `RCPT-${uuidv4().slice(0, 8).toUpperCase()}`;
 
       // 4. Insert the main sale record
@@ -67,8 +66,8 @@ export const createSale = async (req, res) => {
         .values({
           receiptId: receiptId,
           total: total,
-          tax: tax,
-          discount: discount,
+          tax: Number(tax),
+          discount: Number(discount),
         })
         .returning();
 

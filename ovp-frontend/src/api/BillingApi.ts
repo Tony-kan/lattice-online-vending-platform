@@ -29,6 +29,7 @@ billingApiClient.interceptors.request.use(
 export const createSale = async (
   saleData: INewSalePayload
 ): Promise<ISaleReceipt> => {
+  console.log("sent data to backend : ", saleData);
   const response = await billingApiClient.post("/sales", saleData);
   return response.data;
 };

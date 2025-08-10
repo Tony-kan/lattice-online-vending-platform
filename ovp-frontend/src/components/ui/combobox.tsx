@@ -66,7 +66,7 @@ export function Combobox({
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full rounded-sm p-0 bg-white border-2 border-amber-500">
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandEmpty>{notFoundMessage}</CommandEmpty>

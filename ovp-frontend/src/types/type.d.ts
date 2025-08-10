@@ -113,3 +113,12 @@ export interface ISaleReceipt {
   items: ISaleItem[];
   created_at: string;
 }
+
+export interface INewSalePayload {
+  items: {
+    item_id: number | string;
+    quantity: number;
+  }[];
+  tax: number;
+  discount: number;
+}

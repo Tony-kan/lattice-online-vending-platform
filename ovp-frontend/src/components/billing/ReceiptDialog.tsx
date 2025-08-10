@@ -23,7 +23,7 @@ interface ReceiptDialogProps {
 export const ReceiptDialog = ({ receipt, isLoading }: ReceiptDialogProps) => {
   if (isLoading) {
     return (
-      <DialogContent>
+      <DialogContent className="bg-white border-2 border-amber-500">
         <DialogHeader>
           <DialogTitle>Loading Receipt...</DialogTitle>
         </DialogHeader>
@@ -34,15 +34,15 @@ export const ReceiptDialog = ({ receipt, isLoading }: ReceiptDialogProps) => {
 
   if (!receipt) {
     return (
-      <DialogContent>
+      <DialogContent className="bg-white border-2 border-amber-500">
         <DialogHeader>
-          <DialogTitle>Error</DialogTitle>
+          <DialogTitle className="text-red-500">Error</DialogTitle>
         </DialogHeader>
         <p>Could not load receipt details.</p>
       </DialogContent>
     );
   }
-  console.log("Receipt :", receipt);
+  //   console.log("Receipt :", receipt);
   return (
     <DialogContent className="max-w-lg bg-white border-amber-500 rounded-sm">
       <DialogHeader>

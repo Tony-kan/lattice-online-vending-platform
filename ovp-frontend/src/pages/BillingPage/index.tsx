@@ -31,6 +31,7 @@ import { ReceiptDialog } from "@/components/billing/ReceiptDialog"; // Import th
 import type {
   BreadcrumbItem,
   IInventoryItem,
+  INewSalePayload,
   ISaleItem,
   ISaleReceipt,
 } from "@/types/type";
@@ -83,7 +84,7 @@ const BillingPage = () => {
   const createSaleMutation = useMutation<
     ISaleReceipt,
     AxiosError<ApiError>,
-    any
+    INewSalePayload
   >({
     mutationFn: createSale,
     onSuccess: () => {
@@ -95,9 +96,9 @@ const BillingPage = () => {
       alert("Sale created successfully!");
     },
     onError: (err) =>
-      alert(`Error: ${err.response?.data?.error || err.message}`),
+      console.log(`Error: ${err.response?.data?.error || err.message}`),
   });
-
+  //  alert(`Error: ${err.response?.data?.error || err.message}`),
   // --- HANDLERS ---
   const handleViewReceiptClick = (receiptId: string | number) => {
     setViewingReceiptId(receiptId);
@@ -132,21 +133,45 @@ const BillingPage = () => {
   const handleRemoveItem = (itemId: string | number) => {
     setCart(cart.filter((item) => item.item_id !== itemId));
   };
-  const { subtotal, grandTotal } = useMemo(() => {
+
+  // 4. Calculate totals using useMemo for efficiency
+  const { subtotal, totalTax, totalDiscount, grandTotal } = useMemo(() => {
     const sub = cart.reduce(
       (acc, item) => acc + (item.price || 0) * item.quantity,
       0
     );
-    const total = sub + (parseFloat(tax) || 0) - (parseFloat(discount) || 0);
-    return { subtotal: sub, grandTotal: total };
+    const taxVal = Math.abs(parseFloat(tax)) || 0;
+    const discountVal = Math.abs(parseFloat(discount)) || 0;
+    // This formula correctly adds tax and subtracts discount.
+    const total = sub + taxVal - discountVal;
+    return {
+      subtotal: sub,
+      totalTax: taxVal,
+      totalDiscount: discountVal,
+      grandTotal: total,
+    };
   }, [cart, tax, discount]);
+
+  // const { subtotal, grandTotal } = useMemo(() => {
+  //   const sub = cart.reduce(
+  //     (acc, item) => acc + (item.price || 0) * item.quantity,
+  //     0
+  //   );
+  //   const total = sub + (parseFloat(tax) || 0) - (parseFloat(discount) || 0);
+  //   return { subtotal: sub, grandTotal: total };
+  // }, [cart, tax, discount]);
+
   const handleSubmitSale = () => {
     if (cart.length === 0)
       return alert("Cannot create a sale with an empty cart.");
+
+    const sanitizedTax = Math.abs(parseFloat(tax)) || 0;
+    const sanitizedDiscount = Math.abs(parseFloat(discount)) || 0;
+
     const payload = {
       items: cart.map(({ item_id, quantity }) => ({ item_id, quantity })),
-      tax: parseFloat(tax) || 0,
-      discount: parseFloat(discount) || 0,
+      tax: sanitizedTax,
+      discount: sanitizedDiscount,
     };
     createSaleMutation.mutate(payload);
   };
@@ -155,13 +180,13 @@ const BillingPage = () => {
     <ModuleLayout title="Billing & Point of Sale" breadcrumbs={breadcrumbItems}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
         <div className="md:col-span-2">
-          <Card>
+          <Card className="rounded-sm">
             <CardHeader>
               <CardTitle>New Sale</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label>Add Item to Sale</Label>
+                <Label className="mb-4">Add Item to Sale</Label>
                 <Combobox
                   items={inventoryItems.map((item) => ({
                     value: item.id.toString(),
@@ -208,7 +233,7 @@ const BillingPage = () => {
           </Card>
         </div>
         <div>
-          <Card>
+          <Card className="rounded-sm border-2 ">
             <CardHeader>
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
@@ -236,6 +261,15 @@ const BillingPage = () => {
                 />
               </div>
               <hr />
+              <div className="flex justify-between text-muted-foreground">
+                <span>Tax to be Added</span>
+                <span>{formatPrice(totalTax)}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Discount to be Applied</span>
+                <span>-{formatPrice(totalDiscount)}</span>
+              </div>
+              <hr />
               <div className="flex justify-between font-bold text-lg">
                 <span>Grand Total</span>
                 <span>{formatPrice(grandTotal)}</span>
@@ -257,9 +291,9 @@ const BillingPage = () => {
       </div>
 
       {/* --- SALES HISTORY TABLE (Now with functional button) --- */}
-      <div className="mt-12">
+      <div className="mt-12 pb-6">
         <h2 className="text-2xl font-bold mb-4">Recent Sales</h2>
-        <Card>
+        <Card className="rounded-sm ">
           <CardContent className="pt-6">
             <Table>
               <TableHeader>
