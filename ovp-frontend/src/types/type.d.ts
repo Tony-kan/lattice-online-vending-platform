@@ -82,3 +82,34 @@ export interface INewInventoryItem {
   price: number;
   stock: number;
 }
+
+// ... (your existing types)
+
+// An item within a sale request or receipt
+export interface ISaleItem {
+  item_id: number | string;
+  quantity: number;
+  name?: string; // Optional: For display purposes on the frontend
+  price?: number; // Optional: For display purposes on the frontend
+}
+
+// The payload sent to the backend to create a new sale
+export interface INewSalePayload {
+  items: {
+    item_id: number | string;
+    quantity: number;
+  }[];
+  tax: number;
+  discount: number;
+}
+
+// The receipt object returned by the backend after a sale is created
+export interface ISaleReceipt {
+  id: number | string;
+  receipt: string;
+  total: number;
+  tax: number;
+  discount: number;
+  items: ISaleItem[];
+  created_at: string;
+}

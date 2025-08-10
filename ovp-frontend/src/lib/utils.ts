@@ -54,3 +54,33 @@ export const formatDateTime = (
     return fallback; // Return fallback on any unexpected formatting error.
   }
 };
+
+export const formatPrice = (
+  price: number | string | null | undefined,
+  fallback: string = "—"
+): string => {
+  // 1. Handle null, undefined, or empty string inputs
+  if (price === null || price === undefined || price === "") {
+    return fallback;
+  }
+
+  // 2. Convert the input to a number and check if it's a valid number
+  const numericPrice = Number(price);
+  if (isNaN(numericPrice)) {
+    return fallback;
+  }
+
+  // 3. Use the powerful Intl.NumberFormat API for correct formatting
+  try {
+    return new Intl.NumberFormat("en-US", {
+      // Using 'en-US' for the comma/period convention
+      style: "currency",
+      currency: "MWK", // The ISO 4217 code for Malawian Kwacha
+      minimumFractionDigits: 2, // Always show at least two decimal places
+      maximumFractionDigits: 2, // Round to two decimal places
+    }).format(numericPrice);
+  } catch (error) {
+    console.error("Currency formatting failed:", error);
+    return fallback; // Return fallback on any unexpected error
+  }
+};

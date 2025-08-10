@@ -1,96 +1,155 @@
-// backend/billing-service/controllers/sales.controller.js
-
-import { poolClient } from "../database/connect_db.js";
 import { v4 as uuidv4 } from "uuid";
 import { database } from "../database/connect_db.js";
 import { sales } from "../database/models/sales.model.js";
-import { sale_items } from "../database/models/sale_items.model.js";
-import { eq } from "drizzle-orm";
+import { saleItems } from "../database/models/sale_items.model.js";
+import { items } from "../../inventory-service/database/models/item.model.js";
+import { eq, inArray, desc, sql } from "drizzle-orm";
 
-// Create sale (transactional: insert sale, sale_items, deduct inventory)
-export const createSale = async (req, res) => {
-  /**
-   * expected body:
-   * { items: [{ item_id, quantity }], tax: 0.18 (optional), discount: 0.05 (optional) }
-   */
-  const { items: saleItems = [], tax = 0, discount = 0 } = req.body;
-  if (!Array.isArray(saleItems) || saleItems.length === 0)
-    return res.status(400).json({ error: "no items" });
-
-  const client = await poolClient.connect();
+// Get all sales for the sales history table
+export const getAllSales = async (req, res) => {
   try {
-    await client.query("BEGIN");
+    const allSales = await database
+      .select()
+      .from(sales)
+      .orderBy(desc(sales.created_at));
+    console.log("all sales ", allSales);
 
-    // fetch items and calculate totals
-    const ids = saleItems.map((it) => it.item_id);
-    const placeholders = ids.map((_, i) => `$${i + 1}`).join(",");
-    const { rows } = await client.query(
-      `SELECT id, price, stock, name FROM items WHERE id IN (${placeholders})`,
-      ids
-    );
-    // simple lookup
-    const map = new Map(rows.map((r) => [r.id, r]));
-
-    let subtotal = 0;
-    for (const si of saleItems) {
-      const row = map.get(si.item_id);
-      if (!row) throw new Error(`item ${si.item_id} not found`);
-      if (row.stock < si.quantity)
-        throw new Error(`insufficient stock for item ${si.item_id}`);
-      subtotal += Number(row.price) * Number(si.quantity);
-    }
-
-    const taxAmount = Number(subtotal) * Number(tax || 0);
-    const discountAmount = Number(subtotal) * Number(discount || 0);
-    const total = subtotal + taxAmount - discountAmount;
-
-    // insert sale
-    const receipt = `RCPT-${uuidv4().slice(0, 8)}`;
-    const saleResult = await client.query(
-      `INSERT INTO sales (receipt, total, tax, discount) VALUES ($1,$2,$3,$4) RETURNING id, receipt, total`,
-      [receipt, total, taxAmount, discountAmount]
-    );
-    const saleId = saleResult.rows[0].id;
-
-    // insert sale_items and deduct stock
-    for (const si of saleItems) {
-      const row = map.get(si.item_id);
-      await client.query(
-        `INSERT INTO sale_items (sale_id, item_id, price, quantity) VALUES ($1,$2,$3,$4)`,
-        [saleId, si.item_id, row.price, si.quantity]
-      );
-      // deduct stock
-      await client.query(`UPDATE items SET stock = stock - $1 WHERE id = $2`, [
-        si.quantity,
-        si.item_id,
-      ]);
-    }
-
-    await client.query("COMMIT");
-    res.json({ saleId, receipt, total });
+    res.json(allSales);
   } catch (err) {
-    await client.query("ROLLBACK");
-    console.error(err);
-    res.status(400).json({ error: err.message });
-  } finally {
-    client.release();
+    console.error("Failed to fetch sales history:", err);
+    res.status(500).json({ error: "Could not retrieve sales history" });
   }
 };
 
-//get receipt
+// REFACTORED: Create sale using a Drizzle transaction
+export const createSale = async (req, res) => {
+  const { items: newSaleItems = [], tax = 0, discount = 0 } = req.body;
+  if (!Array.isArray(newSaleItems) || newSaleItems.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "Sale must include at least one item" });
+  }
 
+  try {
+    const result = await database.transaction(async (tx) => {
+      // 1. Fetch all required items from inventory in one query
+      const itemIds = newSaleItems.map((it) => it.item_id);
+      const fetchedItems = await tx
+        .select()
+        .from(items)
+        .where(inArray(items.id, itemIds));
+
+      // Create a lookup map for easy access
+      const itemsMap = new Map(fetchedItems.map((item) => [item.id, item]));
+
+      // 2. Validate stock and calculate subtotal
+      let subtotal = 0;
+      for (const saleItem of newSaleItems) {
+        const dbItem = itemsMap.get(saleItem.item_id);
+        if (!dbItem) {
+          throw new Error(`Item with ID ${saleItem.item_id} not found.`);
+        }
+        if (dbItem.stock < saleItem.quantity) {
+          throw new Error(
+            `Insufficient stock for ${dbItem.name}. Available: ${dbItem.stock}, Requested: ${saleItem.quantity}.`
+          );
+        }
+        subtotal += Number(dbItem.price) * Number(saleItem.quantity);
+      }
+
+      // 3. Calculate final total
+      const total = subtotal * (1 + Number(tax)) * (1 - Number(discount));
+      const receiptId = `RCPT-${uuidv4().slice(0, 8).toUpperCase()}`;
+
+      // 4. Insert the main sale record
+      const [newSale] = await tx
+        .insert(sales)
+        .values({
+          receiptId: receiptId,
+          total: total,
+          tax: tax,
+          discount: discount,
+        })
+        .returning();
+
+      // 5. Prepare and insert all sale items
+      const saleItemsToInsert = newSaleItems.map((saleItem) => {
+        const dbItem = itemsMap.get(saleItem.item_id);
+        return {
+          saleId: newSale.id,
+          itemId: saleItem.item_id,
+          price: dbItem.price, // Record the price at the time of sale
+          quantity: saleItem.quantity,
+        };
+      });
+      await tx.insert(saleItems).values(saleItemsToInsert);
+
+      // 6. Update stock for each item
+      for (const saleItem of newSaleItems) {
+        await tx
+          .update(items)
+          .set({
+            stock: sql`${items.stock} - ${saleItem.quantity}`,
+          })
+          .where(eq(items.id, saleItem.item_id));
+      }
+
+      // 7. Construct and return the full receipt object
+      return {
+        ...newSale,
+        items: saleItemsToInsert.map((si) => ({
+          ...si,
+          name: itemsMap.get(si.itemId)?.name,
+        })),
+      };
+    });
+
+    // If transaction is successful, send the full receipt back
+    res.status(201).json(result);
+  } catch (err) {
+    console.error("Sale transaction failed:", err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// Get a single receipt with item details included
 export const getReceipt = async (req, res) => {
-  const { receipt } = req.params;
-  const sale = await database
-    .select()
-    .from(sales)
-    .where(eq(sales.receipt, receipt));
-  if (sale.length === 0) return res.status(404).json({ error: "not found" });
+  const { receipt } = req.params; // Used receipt:  for clarity
 
-  const saleId = sale[0].id;
-  const itemsRows = await database
-    .select()
-    .from(sale_items)
-    .where(eq(sale_items.sale_id, saleId));
-  res.json({ sale: sale[0], items: itemsRows });
+  try {
+    const saleResult = await database.query.sales.findFirst({
+      where: eq(sales.receipt, receipt),
+      with: {
+        // "saleItems" is the name of the relation in your sales schema
+        saleItems: {
+          with: {
+            // "item" is the name of the relation in your saleItems schema
+            item: {
+              columns: {
+                name: true, // Only select the item name
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!saleResult) {
+      return res.status(404).json({ error: "Receipt not found" });
+    }
+
+    const response = {
+      ...saleResult,
+      items: saleResult.saleItems.map((si) => ({
+        ...si,
+        name: si.item.name,
+        item: undefined,
+      })),
+    };
+
+    res.json(response);
+  } catch (err) {
+    console.error("Failed to fetch receipt:", err);
+    res.status(500).json({ error: "Could not retrieve receipt" });
+  }
 };
