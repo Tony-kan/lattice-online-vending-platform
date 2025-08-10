@@ -58,13 +58,14 @@ export const createSale = async (req, res) => {
 
       // 3. Calculate final total
       const total = subtotal + Number(tax) - Number(discount);
+
       const receiptId = `RCPT-${uuidv4().slice(0, 8).toUpperCase()}`;
 
       // 4. Insert the main sale record
       const [newSale] = await tx
         .insert(sales)
         .values({
-          receiptId: receiptId,
+          receipt: receiptId,
           total: total,
           tax: Number(tax),
           discount: Number(discount),
@@ -75,8 +76,8 @@ export const createSale = async (req, res) => {
       const saleItemsToInsert = newSaleItems.map((saleItem) => {
         const dbItem = itemsMap.get(saleItem.item_id);
         return {
-          saleId: newSale.id,
-          itemId: saleItem.item_id,
+          sale_id: newSale.id,
+          item_id: saleItem.item_id,
           price: dbItem.price, // Record the price at the time of sale
           quantity: saleItem.quantity,
         };
@@ -98,7 +99,7 @@ export const createSale = async (req, res) => {
         ...newSale,
         items: saleItemsToInsert.map((si) => ({
           ...si,
-          name: itemsMap.get(si.itemId)?.name,
+          name: itemsMap.get(si.item_id)?.name,
         })),
       };
     });
